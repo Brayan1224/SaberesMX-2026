@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ruta SanaMente</title>
+<style>
+/* ============================================================
+   1. TOKENS / VARIABLES
+   ============================================================ */
+:root{
+  --ink:#1B2420;
+  --paper:#F4F1E8;
+  --panel:#FFFFFF;
+
+  --pine:#143A2F;          /* fondo tablero */
+  --pine-deep:#0D2A22;
+  --moss:#3E8E73;          /* U1 */
+  --amber:#D79A3C;         /* U2 */
+  --garnet:#A23B52;        /* U3 */
+  --plum:#6C5499;          /* U4 */
+  --teal:#2C7C92;          /* U5 */
+
+  --gold:#F2C166;
+  --line:#E3DDC9;
+  --muted:#7C7A6B;
+
+  --ok-bg:#E4F2E6;
+  --ok-line:#3E8E73;
+  --ok-text:#1F5C3F;
+  --bad-bg:#F7E3E6;
+  --bad-line:#A23B52;
+  --bad-text:#7A2638;
+
+  --r-lg:20px;
+  --r-md:14px;
+  --r-sm:9px;
+  --shadow-1: 0 1px 2px rgba(20,30,25,.06), 0 6px 18px rgba(20,30,25,.08);
+  --shadow-2: 0 2px 6px rgba(20,30,25,.10), 0 14px 32px rgba(20,30,25,.14);
+
+  --font-display: 'Fraunces', 'Georgia', serif;
+  --font-body: 'Inter', 'Segoe UI', sans-serif;
+}
+
+@font-face{ /* fallback-safe: system fonts used if these aren't available */
+  font-family:'Fraunces'; src:local('Georgia');
+}
+
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0;
+  font-family:var(--font-body);
+  background:
+    radial-gradient(1200px 600px at 10% -10%, #F8F4E8 0%, var(--paper) 55%),
+    var(--paper);
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:var(--font-body);border:none;cursor:pointer;background:none;}
+button:focus-visible, .opt:focus-visible{outline:3px solid var(--gold);outline-offset:2px;}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
+}
+
+/* ============================================================
+   2. APP SHELL
+   ============================================================ */
+.app{max-width:1180px;margin:0 auto;padding:28px 20px 60px;}
+
+.brandbar{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  margin-bottom:22px;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.brand-mark{
+  width:34px;height:34px;border-radius:10px;
+  background:linear-gradient(135deg,var(--moss),var(--teal));
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--shadow-1);
+}
+.brand-name{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:20px;
+  letter-spacing:-0.01em;
+  color:var(--pine-deep);
+}
+.brand-tag{
+  font-size:11px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--muted);
+  font-weight:600;
+}
+
+/* ============================================================
+   3. PANTALLA DE CONFIGURACIÓN
+   ============================================================ */
+.setup-screen{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:72vh;
+}
+.setup-card{
+  background:var(--panel);
+  border-radius:24px;
+  box-shadow:var(--shadow-2);
+  padding:44px 40px;
+  max-width:560px;
+  width:100%;
+  text-align:center;
+  border:1px solid var(--line);
+}
+.setup-eyebrow{
+  font-size:11px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--garnet);
+  font-weight:700;
+  margin-bottom:10px;
+}
+.setup-title{
+  font-family:var(--font-display);
+  font-size:38px;
+  font-weight:700;
+  color:var(--pine-deep);
+  margin:0 0 10px;
+  letter-spacing:-0.015em;
+}
+.setup-desc{
+  color:var(--muted);
+  font-size:14.5px;
+  line-height:1.6;
+  max-width:420px;
+  margin:0 auto 30px;
+}
+.setup-label{
+  font-size:12px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--ink);
+  margin-bottom:12px;
+  text-align:left;
+}
+.player-count{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin-bottom:30px;
+}
+.count-btn{
+  padding:16px 0;
+  border-radius:14px;
+  border:2px solid var(--line);
+  background:var(--paper);
+  font-size:18px;
+  font-weight:700;
+  color:var(--ink);
+  transition:all .15s ease;
+}
+.count-btn:hover{border-color:var(--moss);}
+.count-btn.selected{
+  border-color:var(--pine-deep);
+  background:var(--pine-deep);
+  color:white;
+  transform:translateY(-2px);
+  box-shadow:var(--shadow-1);
+}
+.count-btn .count-label{
+  display:block;
+  font-size:10px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  margin-top:3px;
+  opacity:.7;
+}
+
+.player-name-list{
+  display:grid;
+  gap:10px;
+  margin-bottom:30px;
+  text-align:left;
+}
+.player-name-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.avatar-chip{
+  width:34px;height:34px;
+  border-radius:50%;
+  flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  color:white;
+  font-weight:700;
+  font-size:14px;
+  box-shadow:inset 0 -3px 6px rgba(0,0,0,.15);
+}
+.player-name-row input{
+  flex:1;
+  border:2px solid var(--line);
+  border-radius:10px;
+  padding:9px 12px;
+  font-size:14px;
+  font-family:var(--font-body);
+  color:var(--ink);
+  background:var(--paper);
+}
+.player-name-row input:focus{border-color:var(--moss);outline:none;}
+
+.start-btn{
+  background:var(--garnet);
+  color:white;
+  font-size:15px;
+  font-weight:700;
+  letter-spacing:.02em;
+  padding:15px 0;
+  width:100%;
+  border-radius:14px;
+  box-shadow:var(--shadow-1);
+  transition:all .15s ease;
+}
+.start-btn:hover{background:#8a2f44;transform:translateY(-1px);box-shadow:var(--shadow-2);}
+
+/* ============================================================
+   4. JUEGO — LAYOUT PRINCIPAL
+   ============================================================ */
+.game-screen{display:none;}
+.game-screen.active{display:block;}
+.setup-screen.hidden{display:none;}
+
+.layout{
+  display:grid;
+  grid-template-columns: 1.55fr 1fr;
+  gap:22px;
+  align-items:start;
+}
+@media (max-width:880px){
+  .layout{grid-template-columns:1fr;}
+}
+
+/* ---------- TABLERO ---------- */
+.board-card{
+  background:linear-gradient(160deg, var(--pine) 0%, var(--pine-deep) 100%);
+  border-radius:var(--r-lg);
+  padding:22px;
+  position:relative;
+  box-shadow:var(--shadow-2);
+  overflow:hidden;
+}
+.board-card::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(600px 300px at 90% 0%, rgba(255,255,255,.05), transparent 60%);
+  pointer-events:none;
+}
+.board-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:14px;
+}
+.board-title{
+  font-family:var(--font-display);
+  color:var(--paper);
+  font-size:13px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  opacity:.85;
+  font-weight:600;
+}
+.board-progress{
+  font-size:11px;
+  color:var(--gold);
+  font-weight:700;
+  letter-spacing:.04em;
+}
+
+.board{
+  display:grid;
+  grid-template-columns:repeat(8,1fr);
+  gap:6px;
+  position:relative;
+  z-index:1;
+}
+.cell{
+  aspect-ratio:1/1;
+  border-radius:10px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  font-size:9.5px;
+  font-weight:700;
+  color:rgba(255,255,255,.92);
+  position:relative;
+  letter-spacing:.01em;
+  text-align:center;
+  line-height:1.15;
+  transition:transform .15s ease, box-shadow .15s ease;
+  box-shadow:inset 0 -3px 0 rgba(0,0,0,.18), 0 1px 2px rgba(0,0,0,.1);
+}
+.cell .n{
+  position:absolute;
+  top:3px;
+  left:5px;
+  font-size:8px;
+  opacity:.55;
+  font-weight:600;
+}
+.cell:hover{transform:translateY(-2px) scale(1.04);box-shadow:0 6px 14px rgba(0,0,0,.25);}
+
+.u1{background:linear-gradient(155deg,#4FA084,var(--moss));}
+.u2{background:linear-gradient(155deg,#E5AC5C,var(--amber));}
+.u3{background:linear-gradient(155deg,#BC4F66,var(--garnet));}
+.u4{background:linear-gradient(155deg,#8169B3,var(--plum));}
+.u5{background:linear-gradient(155deg,#3D94AC,var(--teal));}
+
+.start-cell{
+  background:linear-gradient(155deg,#FBE7B8,var(--gold));
+  color:var(--pine-deep) !important;
+  box-shadow:inset 0 -3px 0 rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.1);
+}
+.finish-cell{
+  background:linear-gradient(155deg,#F4D27A,#C99A2E);
+  color:var(--pine-deep) !important;
+  position:relative;
+  box-shadow:0 0 0 2px var(--gold), 0 6px 18px rgba(242,193,102,.5);
+}
+/* estrella dibujada en CSS (sin emoji) */
+.finish-cell::after{
+  content:'';
+  position:absolute;
+  top:-5px;
+  right:-4px;
+  width:16px;height:16px;
+  background:var(--gold);
+  clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.35));
+}
+
+.cell.active-cell{
+  outline:3px solid var(--gold);
+  outline-offset:1px;
+  z-index:3;
+}
+
+.token-stack{
+  position:absolute;
+  bottom:2px;
+  display:flex;
+  gap:1px;
+}
+.token{
+  width:15px;height:15px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:8px;
+  font-weight:800;
+  color:white;
+  box-shadow:0 2px 4px rgba(0,0,0,.35), inset 0 -2px 2px rgba(0,0,0,.2);
+  border:1.5px solid rgba(255,255,255,.6);
+}
+
+/* ---------- PANEL LATERAL ---------- */
+.side{
+  display:grid;
+  gap:16px;
+}
+.panel{
+  background:var(--panel);
+  border-radius:var(--r-lg);
+  padding:18px 20px;
+  border:1px solid var(--line);
+  box-shadow:var(--shadow-1);
+}
+.panel-title{
+  font-size:11px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  color:var(--muted);
+  margin-bottom:12px;
+}
+
+/* jugadores */
+.player-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:9px 10px;
+  border-radius:12px;
+  margin-bottom:6px;
+  transition:background .15s ease;
+}
+.player-row.current{
+  background:var(--paper);
+  box-shadow:inset 0 0 0 1.5px var(--gold);
+}
+.player-row .avatar-chip{width:30px;height:30px;font-size:12px;}
+.player-info{flex:1;}
+.player-info .pname{font-size:13px;font-weight:700;color:var(--ink);}
+.player-info .ppos{font-size:11px;color:var(--muted);}
+.turn-tag{
+  font-size:9.5px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  color:var(--pine-deep);
+  background:var(--gold);
+  padding:3px 8px;
+  border-radius:20px;
+}
+
+/* turno actual destacado */
+.turn-banner{
+  background:linear-gradient(135deg,var(--pine-deep),var(--pine));
+  border-radius:var(--r-lg);
+  padding:18px 20px;
+  color:var(--paper);
+  box-shadow:var(--shadow-1);
+}
+.turn-banner-label{
+  font-size:10.5px;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  opacity:.7;
+  margin-bottom:4px;
+}
+.turn-banner-name{
+  font-family:var(--font-display);
+  font-size:21px;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+/* dado */
+.dice-zone{text-align:center;padding:20px 16px;}
+.dice{
+  width:68px;height:68px;
+  border-radius:18px;
+  background:linear-gradient(155deg,#fff,#EDE8D6);
+  display:flex;align-items:center;justify-content:center;
+  font-size:30px;
+  font-weight:800;
+  color:var(--pine-deep);
+  margin:0 auto 14px;
+  box-shadow:var(--shadow-1), inset 0 -3px 0 rgba(0,0,0,.05);
+  transition:transform .12s ease;
+}
+.dice.rolling{animation:shake .12s infinite;}
+@keyframes shake{
+  0%{transform:rotate(0deg);}
+  25%{transform:rotate(-8deg);}
+  75%{transform:rotate(8deg);}
+  100%{transform:rotate(0deg);}
+}
+.roll-btn{
+  background:var(--garnet);
+  color:white;
+  padding:12px 30px;
+  border-radius:30px;
+  font-size:13.5px;
+  font-weight:700;
+  letter-spacing:.03em;
+  box-shadow:var(--shadow-1);
+  transition:all .15s ease;
+}
+.roll-btn:hover:not(:disabled){background:#8a2f44;transform:translateY(-1px);}
+.roll-btn:disabled{background:#D8D2C0;color:#9a9586;cursor:not-allowed;box-shadow:none;}
+
+/* categorías */
+.cat-list{display:grid;gap:7px;}
+.cat-item{
+  display:flex;align-items:center;gap:9px;
+  font-size:12.5px;
+  font-weight:600;
+  color:var(--ink);
+}
+.cat-dot{
+  width:13px;height:13px;
+  border-radius:5px;
+  flex-shrink:0;
+  box-shadow:inset 0 -2px 0 rgba(0,0,0,.15);
+}
+
+/* historial */
+.history-list{
+  display:flex;
+  flex-direction:column-reverse;
+  gap:6px;
+  max-height:180px;
+  overflow-y:auto;
+  padding-right:4px;
+}
+.history-list::-webkit-scrollbar{width:5px;}
+.history-list::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px;}
+.history-item{
+  font-size:11.5px;
+  color:var(--muted);
+  padding:6px 9px;
+  background:var(--paper);
+  border-radius:8px;
+  border-left:3px solid var(--line);
+}
+.history-item.ok{border-left-color:var(--moss);color:var(--ok-text);}
+.history-item.bad{border-left-color:var(--garnet);color:var(--bad-text);}
+.history-empty{font-size:12px;color:var(--muted);font-style:italic;}
+
+/* ---------- TARJETA DE PREGUNTA ---------- */
+.card-zone{
+  min-height:150px;
+  background:var(--panel);
+  border-radius:var(--r-lg);
+  padding:20px;
+  border:1px solid var(--line);
+  box-shadow:var(--shadow-1);
+}
+.card-idle{
+  color:var(--muted);
+  font-size:13.5px;
+  text-align:center;
+  padding:18px 0;
+}
+.card-q-wrap{animation:cardIn .25s ease;}
+@keyframes cardIn{
+  from{opacity:0;transform:translateY(6px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.card-unit-label{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-size:10.5px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  padding:4px 10px;
+  border-radius:20px;
+  margin-bottom:12px;
+  color:white;
+}
+.card-q{
+  font-size:16px;
+  line-height:1.45;
+  font-weight:600;
+  margin-bottom:16px;
+  color:var(--ink);
+}
+.options{display:grid;gap:9px;}
+.opt{
+  text-align:left;
+  background:var(--paper);
+  border:1.5px solid var(--line);
+  border-radius:12px;
+  padding:12px 14px;
+  font-size:13.5px;
+  color:var(--ink);
+  transition:all .12s ease;
+}
+.opt:hover:not(:disabled){border-color:var(--moss);background:#fff;}
+.opt:disabled{cursor:default;}
+.opt.correct{background:var(--ok-bg);border-color:var(--ok-line);color:var(--ok-text);font-weight:700;}
+.opt.wrong{background:var(--bad-bg);border-color:var(--bad-line);color:var(--bad-text);}
+
+.feedback{
+  font-size:13px;
+  font-weight:700;
+  margin-top:14px;
+  padding:11px 14px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.feedback.ok{background:var(--ok-bg);color:var(--ok-text);}
+.feedback.bad{background:var(--bad-bg);color:var(--bad-text);}
+
+/* explicación educativa */
+.feedback-expl{
+  font-size:12.5px;
+  font-weight:500;
+  color:var(--ink);
+  margin-top:10px;
+  line-height:1.55;
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:11px 13px;
+}
+.feedback-expl strong{color:var(--pine-deep);}
+
+.next-btn{
+  margin-top:14px;
+  background:var(--pine-deep);
+  color:white;
+  padding:10px 20px;
+  border-radius:24px;
+  font-size:13px;
+  font-weight:700;
+  transition:all .15s ease;
+}
+.next-btn:hover{background:#0a2018;}
+
+/* ---------- RESET ---------- */
+.reset-zone{text-align:center;margin-top:18px;}
+.reset-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  background:var(--panel);
+  border:1.5px solid var(--line);
+  color:var(--muted);
+  font-size:12.5px;
+  font-weight:600;
+  padding:9px 16px;
+  border-radius:24px;
+  transition:all .15s ease;
+}
+.reset-btn:hover{border-color:var(--garnet);color:var(--garnet);}
+
+/* ============================================================
+   5. MODAL DE VICTORIA
+   ============================================================ */
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(13,42,34,.55);
+  backdrop-filter:blur(3px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:50;
+  padding:20px;
+}
+.modal-overlay.active{display:flex;animation:fadeIn .2s ease;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.modal-card{
+  background:var(--panel);
+  border-radius:26px;
+  padding:40px 36px;
+  max-width:440px;
+  width:100%;
+  text-align:center;
+  box-shadow:var(--shadow-2);
+  position:relative;
+  overflow:hidden;
+  animation:popIn .35s cubic-bezier(.2,1.4,.4,1);
+}
+@keyframes popIn{
+  from{opacity:0;transform:scale(.85) translateY(10px);}
+  to{opacity:1;transform:scale(1) translateY(0);}
+}
+/* confeti dibujado en CSS (sin emoji) */
+.confetti{
+  position:absolute;
+  top:-12px;
+  width:9px;height:14px;
+  border-radius:2px;
+  animation:fall 2.6s linear infinite;
+  opacity:.9;
+}
+@keyframes fall{
+  0%{transform:translateY(-20px) rotate(0deg);opacity:1;}
+  100%{transform:translateY(420px) rotate(360deg);opacity:0;}
+}
+.trophy-svg{
+  display:flex;
+  justify-content:center;
+  margin-bottom:8px;
+}
+.modal-eyebrow{
+  font-size:11px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--garnet);
+  font-weight:700;
+  margin-bottom:8px;
+}
+.modal-title{
+  font-family:var(--font-display);
+  font-size:26px;
+  font-weight:700;
+  color:var(--pine-deep);
+  margin:0 0 10px;
+  line-height:1.25;
+}
+.modal-desc{
+  font-size:13.5px;
+  color:var(--muted);
+  line-height:1.6;
+  margin-bottom:22px;
+}
+.modal-stats{
+  display:flex;
+  justify-content:center;
+  gap:26px;
+  margin-bottom:26px;
+}
+.modal-stat .val{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--pine-deep);}
+.modal-stat .lab{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;}
+.modal-actions{display:flex;gap:10px;}
+.modal-btn{
+  flex:1;
+  padding:13px 0;
+  border-radius:14px;
+  font-size:13px;
+  font-weight:700;
+}
+.modal-btn.primary{background:var(--garnet);color:white;}
+.modal-btn.primary:hover{background:#8a2f44;}
+.modal-btn.ghost{background:var(--paper);color:var(--ink);border:1.5px solid var(--line);}
+.modal-btn.ghost:hover{border-color:var(--pine-deep);}
+
+/* confirm reset mini-modal */
+.confirm-box{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(13,42,34,.5);
+  align-items:center;
+  justify-content:center;
+  z-index:60;
+  padding:20px;
+}
+.confirm-box.active{display:flex;}
+.confirm-card{
+  background:var(--panel);
+  border-radius:18px;
+  padding:26px 24px;
+  max-width:320px;
+  text-align:center;
+  box-shadow:var(--shadow-2);
+}
+.confirm-card p{font-size:13.5px;color:var(--ink);margin:0 0 18px;line-height:1.5;}
+.confirm-actions{display:flex;gap:8px;}
+.confirm-actions button{flex:1;padding:10px 0;border-radius:10px;font-size:12.5px;font-weight:700;}
+.confirm-yes{background:var(--garnet);color:white;}
+.confirm-no{background:var(--paper);border:1.5px solid var(--line);color:var(--ink);}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ============ BARRA DE MARCA ============ -->
+  <div class="brandbar">
+    <div class="brand">
+      <div>
+        <div class="brand-name">Ruta SanaMente</div>
+        <div class="brand-tag">Bienestar · Prevención · Cultura de paz</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ PANTALLA DE CONFIGURACIÓN ============ -->
+  <div class="setup-screen" id="setupScreen">
+    <div class="setup-card">
+      <div class="setup-eyebrow">Antes de empezar</div>
+      <h1 class="setup-title">¿Cuántas personas van a jugar?</h1>
+      <p class="setup-desc">Elige el número de jugadores y dale nombre a cada ficha. Recorrerán el tablero respondiendo retos sobre bienestar emocional y prevención de adicciones.</p>
+
+      <div class="setup-label">Número de jugadores</div>
+      <div class="player-count" id="playerCount">
+        <button class="count-btn" data-n="1">1<span class="count-label">Solo</span></button>
+        <button class="count-btn selected" data-n="2">2<span class="count-label">Dúo</span></button>
+        <button class="count-btn" data-n="3">3<span class="count-label">Equipo</span></button>
+        <button class="count-btn" data-n="4">4<span class="count-label">Grupo</span></button>
+      </div>
+
+      <div class="setup-label">Nombres de jugadores</div>
+      <div class="player-name-list" id="playerNameList"></div>
+
+      <button class="start-btn" id="startGameBtn">Iniciar partida</button>
+    </div>
+  </div>
+
+  <!-- ============ PANTALLA DE JUEGO ============ -->
+  <div class="game-screen" id="gameScreen">
+    <div class="layout">
+
+      <!-- TABLERO -->
+      <div class="board-card">
+        <div class="board-header">
+          <div class="board-title">Tablero · Ruta SanaMente</div>
+          <div class="board-progress" id="boardProgress">Casilla 0 de 31</div>
+        </div>
+        <div class="board" id="board"></div>
+      </div>
+
+      <!-- PANEL LATERAL -->
+      <div class="side">
+
+        <!-- turno actual -->
+        <div class="turn-banner">
+          <div class="turn-banner-label">Turno actual</div>
+          <div class="turn-banner-name" id="turnBannerName">—</div>
+        </div>
+
+        <!-- jugadores -->
+        <div class="panel">
+          <div class="panel-title">Jugadores</div>
+          <div id="playersPanel"></div>
+        </div>
+
+        <!-- dado -->
+        <div class="panel dice-zone">
+          <div class="dice" id="dice"></div>
+          <button class="roll-btn" id="rollBtn">Lanzar dado</button>
+        </div>
+
+        <!-- pregunta -->
+        <div class="card-zone" id="cardZone" aria-live="polite">
+          <div class="card-idle">Lanza el dado para descubrir tu reto.</div>
+        </div>
+
+        <!-- categorías -->
+        <div class="panel">
+          <div class="panel-title">Categorías</div>
+          <div class="cat-list">
+            <div class="cat-item"><span class="cat-dot" style="background:var(--moss)"></span>U1 · Bienestar y salud mental</div>
+            <div class="cat-item"><span class="cat-dot" style="background:var(--amber)"></span>U2 · Adicciones</div>
+            <div class="cat-item"><span class="cat-dot" style="background:var(--garnet)"></span>U3 · Fentanilo y metanfetaminas</div>
+            <div class="cat-item"><span class="cat-dot" style="background:var(--plum)"></span>U4 · Otras sustancias</div>
+            <div class="cat-item"><span class="cat-dot" style="background:var(--teal)"></span>U5 · Cultura de paz</div>
+          </div>
+        </div>
+
+        <!-- historial -->
+        <div class="panel">
+          <div class="panel-title">Historial de la partida</div>
+          <div class="history-list" id="historyList">
+            <div class="history-empty">Aún no hay movimientos.</div>
+          </div>
+        </div>
+
+        <div class="reset-zone">
+          <button class="reset-btn" id="resetBtn">Reiniciar partida</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============ MODAL DE VICTORIA ============ -->
+<div class="modal-overlay" id="winModal">
+  <div class="modal-card" id="winCard">
+    <div class="trophy-svg" aria-hidden="true">
+      <svg viewBox="0 0 64 64" width="58" height="58" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 8h28v15c0 7.732-6.268 14-14 14s-14-6.268-14-14V8z" fill="#F2C166"/>
+        <path d="M18 12h-6c0 6 3 9.2 7.4 9.8" stroke="#C99A2E" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path d="M46 12h6c0 6-3 9.2-7.4 9.8" stroke="#C99A2E" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <rect x="29" y="37" width="6" height="9" fill="#C99A2E"/>
+        <rect x="22" y="46" width="20" height="6" rx="2" fill="#C99A2E"/>
+        <rect x="17" y="52" width="30" height="7" rx="3.5" fill="#143A2F"/>
+      </svg>
+    </div>
+    <div class="modal-eyebrow">Partida finalizada</div>
+    <h2 class="modal-title" id="winTitle">¡Felicidades! Has completado la Ruta SanaMente.</h2>
+    <p class="modal-desc">Recorriste las cinco unidades del curso demostrando lo aprendido sobre bienestar emocional y prevención de adicciones.</p>
+    <div class="modal-stats">
+      <div class="modal-stat">
+        <div class="val" id="winTurns">0</div>
+        <div class="lab">Turnos jugados</div>
+      </div>
+      <div class="modal-stat">
+        <div class="val" id="winCorrect">0</div>
+        <div class="lab">Respuestas correctas</div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn ghost" id="backToMenuBtn">Volver al menú</button>
+      <button class="modal-btn primary" id="playAgainBtn">Jugar de nuevo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CONFIRMAR REINICIO ============ -->
+<div class="confirm-box" id="confirmBox">
+  <div class="confirm-card">
+    <p>¿Seguro que quieres reiniciar la partida? Se perderá el progreso actual.</p>
+    <div class="confirm-actions">
+      <button class="confirm-no" id="confirmNo">Cancelar</button>
+      <button class="confirm-yes" id="confirmYes">Sí, reiniciar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIGURACIÓN GENERAL
+   ============================================================ */
+const TOTAL_CELLS = 32;
+const PLAYER_COLORS = ['#3E8E73','#2C6FA8','#D2722E','#7A4FA0']; // verde, azul, naranja, morado
+
+const UNIT_META = {
+  u1:{name:'Unidad 1 · Bienestar y salud mental', color:'var(--moss)'},
+  u2:{name:'Unidad 2 · Adicciones', color:'var(--amber)'},
+  u3:{name:'Unidad 3 · Fentanilo y metanfetaminas', color:'var(--garnet)'},
+  u4:{name:'Unidad 4 · Otras sustancias psicoactivas', color:'var(--plum)'},
+  u5:{name:'Unidad 5 · Cultura de paz', color:'var(--teal)'}
+};
+
+/* Distribución de casillas: solo unidades temáticas, sin casillas de azar */
+function cellType(i){
+  if(i===0) return 'start';
+  if(i===TOTAL_CELLS-1) return 'finish';
+  const unitIndex = (i-1) % 5;
+  return ['u1','u2','u3','u4','u5'][unitIndex];
+}
+
+/* ============================================================
+   BANCO DE PREGUNTAS
+   Cada pregunta: { q, opts[], correct (índice en opts), expl }
+   Las opciones se barajan al mostrarse, así que el índice "correct"
+   se refiere SIEMPRE al orden original definido aquí.
+   ============================================================ */
+const QUESTIONS = {
+  u1:[
+    {q:"¿Cuál es la diferencia entre estrés y ansiedad?",
+     opts:["El estrés es respuesta a algo externo y la ansiedad implica preocupación anticipada","No hay ninguna diferencia entre ambos","La ansiedad siempre es positiva"],
+     correct:0,
+     expl:"El estrés suele aparecer ante una situación concreta (un examen, una entrega); la ansiedad es una preocupación anticipada que puede persistir aunque no haya un peligro presente."},
+    {q:"¿Qué es el autocuidado?",
+     opts:["Resolver todo sin ayuda de nadie","Acciones conscientes para mantener tu bienestar físico, emocional y mental","Dormir la mayor cantidad de horas posible"],
+     correct:1,
+     expl:"El autocuidado son decisiones cotidianas (descanso, alimentación, límites, pedir ayuda) que protegen tu bienestar integral."},
+    {q:"¿Cuál NO es una estrategia sana para manejar el estrés?",
+     opts:["Ignorar las emociones para no pensar en ellas","Hablar con alguien de confianza","Practicar respiración consciente"],
+     correct:0,
+     expl:"Reprimir o ignorar lo que sientes suele aumentar el malestar a largo plazo. Reconocer y expresar las emociones es más saludable."},
+    {q:"¿Qué dimensión del bienestar implica fortalecer la red de apoyo?",
+     opts:["Física","Social","Académica"],
+     correct:1,
+     expl:"La dimensión social del bienestar se relaciona con los vínculos: familia, amistades y comunidad que brindan apoyo."},
+    {q:"Según la Organización Mundial de la Salud, la salud mental es…",
+     opts:["La ausencia total de problemas o tristeza","Un estado de bienestar que permite afrontar el estrés de la vida y desarrollar capacidades","Tener siempre pensamientos positivos"],
+     correct:1,
+     expl:"La salud mental no es 'no sentir nada malo'; es poder afrontar las dificultades de la vida, trabajar de forma productiva y aportar a la comunidad."},
+    {q:"¿Qué es la inteligencia emocional?",
+     opts:["Esconder las emociones para verse fuerte","Reconocer, comprender y regular tus emociones y las de los demás","Sentir solo emociones agradables"],
+     correct:1,
+     expl:"La inteligencia emocional ayuda a identificar lo que sientes, entender por qué, y responder de forma equilibrada en lugar de reaccionar impulsivamente."},
+    {q:"¿Por qué dormir bien es importante para la salud mental?",
+     opts:["No influye en el estado de ánimo","Regula el ánimo, la memoria y reduce el estrés","Dormir poco mejora la concentración"],
+     correct:1,
+     expl:"El sueño insuficiente se asocia con más irritabilidad, ansiedad y problemas de atención. Descansar es una forma básica de cuidar la mente."},
+    {q:"Pedir ayuda profesional ante un malestar emocional prolongado es…",
+     opts:["Una señal de debilidad","Un acto de autocuidado y fortaleza","Algo que solo necesitan personas 'enfermas'"],
+     correct:1,
+     expl:"Buscar apoyo a tiempo (orientación, psicología) es una decisión responsable, igual que ir al médico cuando algo del cuerpo no anda bien."},
+    {q:"¿Qué describe mejor una autoestima saludable?",
+     opts:["Creer que nunca te equivocas","Valorarte de forma realista, reconociendo fortalezas y áreas de mejora","Depender de la aprobación de los demás"],
+     correct:1,
+     expl:"La autoestima sana no es sentirse perfecto, sino aceptarte con tus virtudes y límites, y poder mejorar sin maltratarte."},
+    {q:"¿Qué es una red de apoyo?",
+     opts:["Un grupo de redes sociales en internet","Personas (familia, amistades, profesionales) que te ayudan emocional y prácticamente","Solo los servicios de emergencia"],
+     correct:1,
+     expl:"Una red de apoyo son las personas con quienes puedes contar. Mantenerla cercana es un factor protector frente a las crisis."},
+  ],
+  u2:[
+    {q:"¿La abstinencia es señal de adicción?",
+     opts:["Sí, muestra dependencia del cuerpo o la mente","No, solo es falta de voluntad","Solo ocurre con sustancias ilegales"],
+     correct:0,
+     expl:"El síndrome de abstinencia (malestar al dejar de consumir) es una señal clara de dependencia física o psicológica."},
+    {q:"¿Las adicciones solo se producen por sustancias como alcohol o drogas?",
+     opts:["Sí, únicamente por sustancias","No, también existen adicciones conductuales","Solo en personas con enfermedades previas"],
+     correct:1,
+     expl:"Existen adicciones sin sustancia (juego, apuestas, videojuegos o uso compulsivo de redes) que también afectan la vida diaria."},
+    {q:"¿Qué efecto tiene el estigma en una persona con adicción?",
+     opts:["La motiva a pedir ayuda de inmediato","La aleja de redes de apoyo y tratamiento","No genera ningún efecto"],
+     correct:1,
+     expl:"Juzgar o etiquetar genera vergüenza y aislamiento, lo que dificulta que la persona pida ayuda. El acompañamiento sin juicio es clave."},
+    {q:"¿Qué marca el paso del abuso a la dependencia?",
+     opts:["El costo económico del consumo","Que ya no se pueda dejar de consumir y se necesite más cantidad","Que el consumo se vuelva más social"],
+     correct:1,
+     expl:"La dependencia aparece cuando hay pérdida de control, tolerancia (se necesita más) y malestar al no consumir."},
+    {q:"¿Qué es una adicción conductual?",
+     opts:["Una alergia a ciertas sustancias","La pérdida de control sobre una conducta como apostar o jugar videojuegos","Una etapa normal de la adolescencia"],
+     correct:1,
+     expl:"En la adicción conductual la persona repite una conducta de forma compulsiva pese a sus consecuencias, sin que medie una sustancia."},
+    {q:"¿Qué es la tolerancia en una adicción?",
+     opts:["Aceptar a quienes consumen","Necesitar cada vez más cantidad para lograr el mismo efecto","Aguantar más tiempo sin consumir"],
+     correct:1,
+     expl:"La tolerancia hace que el cuerpo se adapte y pida dosis mayores, lo que aumenta el riesgo y acerca a la dependencia."},
+    {q:"¿La adicción es una falla moral o una enfermedad?",
+     opts:["Es una falta de carácter o de voluntad","Es una enfermedad que afecta el funcionamiento del cerebro","Es simplemente un mal hábito sin importancia"],
+     correct:1,
+     expl:"La adicción modifica los circuitos cerebrales de recompensa y control. Verla como enfermedad ayuda a tratarla y a reducir el estigma."},
+    {q:"¿Qué hace más vulnerable a la adolescencia frente a las adicciones?",
+     opts:["El cerebro aún en desarrollo y la presión de pares","Que las personas jóvenes son más débiles","Nada, el riesgo es igual a cualquier edad"],
+     correct:0,
+     expl:"En la adolescencia la corteza que regula impulsos todavía madura, y la influencia del grupo es muy fuerte: por eso conviene reforzar factores protectores."},
+    {q:"¿Qué papel tiene la familia en la prevención de adicciones?",
+     opts:["Ninguno, depende solo del individuo","La comunicación, los límites claros y el afecto reducen el riesgo","Solo vigilar y castigar"],
+     correct:1,
+     expl:"Un entorno familiar con diálogo, acuerdos claros y cariño funciona como factor protector frente al consumo."},
+    {q:"¿Qué es la prevención de adicciones?",
+     opts:["Esperar a que aparezca el problema para actuar","Acciones para evitar o retrasar el consumo y reducir riesgos","Prohibir hablar del tema"],
+     correct:1,
+     expl:"Prevenir es anticiparse: informar, fortalecer habilidades y crear entornos saludables antes de que el consumo se vuelva un problema."},
+  ],
+  u3:[
+    {q:"¿Por qué el fentanilo es tan peligroso?",
+     opts:["Es mucho más potente que la heroína, por lo que dosis mínimas pueden ser letales","Solo afecta a personas mayores de 60 años","Mejora la calidad del sueño"],
+     correct:0,
+     expl:"El fentanilo es un opioide sintético decenas de veces más potente que la heroína; una cantidad mínima puede causar una sobredosis mortal."},
+    {q:"¿Qué provocan las metanfetaminas al inicio del consumo?",
+     opts:["Sueño profundo e inmediato","Energía extrema y falsa sensación de invencibilidad","Relajación muscular total"],
+     correct:1,
+     expl:"Como estimulante, la metanfetamina acelera el sistema nervioso y da una euforia engañosa que esconde el daño que va causando."},
+    {q:"¿Qué es el 'bajón' o 'crashing' tras consumir estimulantes?",
+     opts:["Una etapa de relajación sin consecuencias","El desplome físico y emocional cuando pasa el efecto","Un mito sin evidencia científica"],
+     correct:1,
+     expl:"Tras la euforia llega un bajón con agotamiento, tristeza e irritabilidad, que empuja a consumir de nuevo y alimenta el ciclo adictivo."},
+    {q:"¿Qué efecto físico principal causa el fentanilo en el cuerpo?",
+     opts:["Aumenta la memoria","Disminuye la respiración","Mejora el apetito"],
+     correct:1,
+     expl:"Los opioides como el fentanilo deprimen la respiración. En una sobredosis, la persona puede dejar de respirar: por eso es tan peligroso."},
+    {q:"¿Qué es una sobredosis por opioides como el fentanilo?",
+     opts:["Una borrachera pasajera","Una depresión respiratoria grave que puede causar la muerte","Solo un dolor de cabeza fuerte"],
+     correct:1,
+     expl:"En la sobredosis la respiración se vuelve lenta o se detiene. Es una emergencia médica que requiere atención inmediata."},
+    {q:"¿Qué medicamento puede revertir una sobredosis por opioides?",
+     opts:["La aspirina","La naloxona","Un antibiótico común"],
+     correct:1,
+     expl:"La naloxona bloquea temporalmente el efecto del opioide y puede salvar la vida mientras llega ayuda médica; no sustituye al llamado a emergencias."},
+    {q:"¿Por qué es tan peligroso que el fentanilo se mezcle en otras drogas?",
+     opts:["Porque mejora su sabor","Porque la persona puede consumirlo sin saberlo, con dosis letales mínimas","Porque las hace más baratas"],
+     correct:1,
+     expl:"El fentanilo se ha encontrado mezclado en pastillas y otras sustancias. Quien consume puede no saber que lo contiene, lo que multiplica el riesgo de muerte."},
+    {q:"¿Qué daño provoca el consumo prolongado de metanfetamina?",
+     opts:["Mejora la salud dental","Deterioro dental, pérdida de peso y daño cerebral","Aumenta la memoria a largo plazo"],
+     correct:1,
+     expl:"El consumo crónico daña dientes y piel, provoca pérdida de peso extrema y afecta funciones cerebrales como la memoria y el control de impulsos."},
+    {q:"¿Qué se debe hacer ante una posible sobredosis?",
+     opts:["Dejar a la persona sola para que descanse","Llamar de inmediato a emergencias (911) y no dejarla sola","Esperar a ver si mejora por su cuenta"],
+     correct:1,
+     expl:"Ante señales de sobredosis hay que pedir ayuda al 911 cuanto antes, mantener a la persona acompañada y vigilar su respiración."},
+  ],
+  u4:[
+    {q:"¿Cómo se clasifica principalmente el alcohol según su efecto en el sistema nervioso?",
+     opts:["Como estimulante puro","Como depresor del sistema nervioso central","Como alucinógeno"],
+     correct:1,
+     expl:"Aunque al inicio puede 'desinhibir', el alcohol es un depresor: enlentece reflejos, juicio y coordinación, y en exceso deprime funciones vitales."},
+    {q:"¿Por qué los inhalables son de fácil acceso para jóvenes?",
+     opts:["Se venden solo con receta médica","Se consiguen en tiendas, ferreterías y hasta en casa","Tienen un costo muy elevado"],
+     correct:1,
+     expl:"Pegamentos, solventes y aerosoles son productos legales de uso común, lo que facilita su acceso y su uso indebido entre jóvenes."},
+    {q:"¿Cuál es un ejemplo de uso médico adecuado de benzodiacepinas?",
+     opts:["Comprarlas en un puesto informal","Recibirlas recetadas por un médico, en dosis bajas y por periodo corto","Tomarlas en un reto viral de redes sociales"],
+     correct:1,
+     expl:"Las benzodiacepinas tienen usos médicos válidos, pero solo bajo prescripción y control profesional; usarlas sin receta es muy riesgoso."},
+    {q:"¿Por qué los inhalables son especialmente peligrosos?",
+     opts:["Solo provocan dolor de cabeza leve","Pueden causar daño cerebral e incluso la muerte súbita","No tienen ningún riesgo real"],
+     correct:1,
+     expl:"Los inhalables dañan el cerebro y otros órganos, y pueden provocar paro cardíaco o muerte súbita incluso en el primer consumo."},
+    {q:"¿La marihuana es inofensiva por ser 'natural'?",
+     opts:["Sí, lo natural nunca hace daño","No; afecta memoria, atención y el cerebro en desarrollo","Solo es dañina si se mezcla con tabaco"],
+     correct:1,
+     expl:"Que algo sea de origen vegetal no lo vuelve seguro. En personas jóvenes, su consumo puede afectar el aprendizaje y la maduración cerebral."},
+    {q:"¿Qué sustancia del tabaco genera dependencia?",
+     opts:["La cafeína","La nicotina","El azúcar"],
+     correct:1,
+     expl:"La nicotina es altamente adictiva y mantiene el consumo de cigarros y vapeadores, además del daño que causa a pulmones y corazón."},
+    {q:"¿Qué órgano daña principalmente el consumo crónico de alcohol?",
+     opts:["El hígado","Los huesos","Los dientes únicamente"],
+     correct:0,
+     expl:"El consumo excesivo y prolongado puede provocar cirrosis y otros daños hepáticos, además de afectar cerebro y corazón."},
+    {q:"¿Qué riesgo tiene mezclar alcohol con otras sustancias depresoras?",
+     opts:["Reduce los efectos de ambas","Potencia los efectos y aumenta el riesgo de depresión respiratoria","No pasa nada si son pocas"],
+     correct:1,
+     expl:"Combinar alcohol con tranquilizantes u opioides suma efectos depresores y puede frenar peligrosamente la respiración."},
+    {q:"¿Qué es el consumo responsable de medicamentos?",
+     opts:["Tomar lo que recomienden amigos o redes","Usarlos solo con receta, dosis y tiempo indicados por un profesional","Aumentar la dosis si no funcionan rápido"],
+     correct:1,
+     expl:"Los medicamentos ayudan cuando se usan según indicación médica. Automedicarse o cambiar dosis por cuenta propia puede ser dañino."},
+  ],
+  u5:[
+    {q:"¿Qué es la resiliencia en el contexto de la prevención?",
+     opts:["Depender de otros para resolver todo","La capacidad de adaptarse y recuperarse ante la adversidad","Evitar sentir cualquier emoción"],
+     correct:1,
+     expl:"La resiliencia permite afrontar momentos difíciles y reponerse, en lugar de buscar salidas dañinas como el consumo."},
+    {q:"¿Qué habilidad cognitiva protege frente al consumo de sustancias?",
+     opts:["La impulsividad","La toma de decisiones conscientes","Dejarse llevar por el grupo"],
+     correct:1,
+     expl:"Pensar las consecuencias antes de actuar y decidir con información reduce el riesgo de caer en presiones o conductas peligrosas."},
+    {q:"¿Qué valor de la cultura de paz ayuda a prevenir el consumo?",
+     opts:["La resolución no violenta de conflictos","El uso de sanciones estrictas","La indiferencia ante la diversidad"],
+     correct:0,
+     expl:"Resolver conflictos con diálogo y respeto construye entornos seguros donde es menos probable recurrir a conductas de riesgo."},
+    {q:"¿Qué estrategia es más saludable ante una emoción intensa?",
+     opts:["Guardarla para no preocupar a nadie","Nombrarla, validarla y aplicar una estrategia de regulación","Reaccionar de forma impulsiva"],
+     correct:1,
+     expl:"Identificar la emoción, aceptarla y usar técnicas de regulación (respirar, hablarlo, pausar) evita reacciones de las que luego te arrepientas."},
+    {q:"¿Qué es la cultura de paz?",
+     opts:["Evitar todo tipo de desacuerdo","Valores y conductas que rechazan la violencia y promueven el diálogo y el respeto","Imponer la opinión propia sin discutir"],
+     correct:1,
+     expl:"La cultura de paz busca convivir resolviendo diferencias sin violencia, con respeto y cooperación."},
+    {q:"¿Qué es la empatía?",
+     opts:["Sentir lástima por alguien","Comprender y compartir los sentimientos de otra persona","Estar siempre de acuerdo con todos"],
+     correct:1,
+     expl:"La empatía ayuda a entender a las personas, fortalecer vínculos y apoyar sin juzgar, algo clave para acompañar a quien lo necesita."},
+    {q:"¿Qué es la asertividad?",
+     opts:["Imponerse a los demás gritando","Expresar lo que piensas y sientes con respeto, sin agredir ni someterte","Quedarte callado para evitar problemas"],
+     correct:1,
+     expl:"Ser asertivo te permite decir 'no', poner límites y defender tu postura sin lastimar a otros: una habilidad protectora frente a la presión."},
+    {q:"¿Cómo se resuelve un conflicto de forma pacífica?",
+     opts:["Imponiendo la fuerza","Mediante el diálogo, la escucha y la búsqueda de acuerdos","Ignorando a la otra persona para siempre"],
+     correct:1,
+     expl:"Escuchar, expresar lo que sientes y buscar acuerdos resuelve conflictos sin violencia y fortalece la convivencia."},
+    {q:"¿Cómo protege tener un proyecto de vida?",
+     opts:["No influye en las decisiones diarias","Da metas y sentido que motivan a tomar decisiones saludables","Solo sirve para conseguir trabajo"],
+     correct:1,
+     expl:"Tener metas y un propósito da dirección y razones para cuidarte, lo que reduce la probabilidad de conductas de riesgo."},
+  ]
+};
+
+/* ============================================================
+   ESTADO DEL JUEGO
+   ============================================================ */
+let selectedCount = 2;
+let players = [];       // {name, color, initial}
+let positions = [];
+let currentPlayer = 0;
+let gameOver = false;
+let pendingAnswer = false;
+let hasRolledThisTurn = false;
+let turnCount = 0;
+let correctCount = 0;
+let history = [];
+let usedQuestions = {}; // control de preguntas ya usadas por unidad
+
+function resetUsedQuestions(){
+  usedQuestions = {u1:[],u2:[],u3:[],u4:[],u5:[]};
+}
+
+/* Utilidad: barajar un arreglo (Fisher-Yates) */
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+  return arr;
+}
+
+/* Elegir una pregunta sin repetir hasta agotar el banco de la unidad */
+function pickQuestion(unit){
+  const bank = QUESTIONS[unit];
+  if(!usedQuestions[unit]) usedQuestions[unit] = [];
+  if(usedQuestions[unit].length >= bank.length) usedQuestions[unit] = [];
+  let idx;
+  do{
+    idx = Math.floor(Math.random()*bank.length);
+  }while(usedQuestions[unit].includes(idx));
+  usedQuestions[unit].push(idx);
+  return bank[idx];
+}
+
+/* ============================================================
+   PANTALLA DE CONFIGURACIÓN — lógica
+   ============================================================ */
+const playerCountEl = document.getElementById('playerCount');
+const playerNameListEl = document.getElementById('playerNameList');
+
+function renderNameInputs(){
+  playerNameListEl.innerHTML = '';
+  for(let i=0;i<selectedCount;i++){
+    const row = document.createElement('div');
+    row.className = 'player-name-row';
+    const color = PLAYER_COLORS[i];
+    row.innerHTML = `
+      <span class="avatar-chip" style="background:${color}">${i+1}</span>
+      <input type="text" maxlength="14" placeholder="Jugador ${i+1}" id="nameInput${i}">
+    `;
+    playerNameListEl.appendChild(row);
+  }
+}
+renderNameInputs();
+
+playerCountEl.addEventListener('click', (e)=>{
+  const btn = e.target.closest('.count-btn');
+  if(!btn) return;
+  selectedCount = parseInt(btn.dataset.n,10);
+  document.querySelectorAll('.count-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  renderNameInputs();
+});
+
+document.getElementById('startGameBtn').addEventListener('click', ()=>{
+  players = [];
+  positions = [];
+  for(let i=0;i<selectedCount;i++){
+    const input = document.getElementById('nameInput'+i);
+    const name = (input.value.trim() || ('Jugador '+(i+1))).slice(0,14);
+    players.push({name, color: PLAYER_COLORS[i], initial: name.charAt(0).toUpperCase()});
+    positions.push(0);
+  }
+  currentPlayer = 0;
+  gameOver = false;
+  pendingAnswer = false;
+  hasRolledThisTurn = false;
+  turnCount = 0;
+  correctCount = 0;
+  history = [];
+  resetUsedQuestions();
+
+  document.getElementById('setupScreen').classList.add('hidden');
+  document.getElementById('gameScreen').classList.add('active');
+
+  renderBoard();
+  renderPlayersPanel();
+  renderTurnBanner();
+  renderHistory();
+  updateRollButton();
+});
+
+/* ============================================================
+   RENDER: TABLERO
+   ============================================================ */
+function renderBoard(){
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  for(let i=0;i<TOTAL_CELLS;i++){
+    const type = cellType(i);
+    const div = document.createElement('div');
+    div.id = 'cell-'+i;
+    let label = '';
+    if(type==='start'){ div.className='cell start-cell'; label='Salida'; }
+    else if(type==='finish'){ div.className='cell finish-cell'; label='Meta'; }
+    else { div.className='cell '+type; label=type.toUpperCase(); }
+    div.innerHTML = `<span class="n">${i}</span><span>${label}</span><span class="token-stack" id="tokens-${i}"></span>`;
+    board.appendChild(div);
+  }
+  placeTokens();
+}
+
+function placeTokens(){
+  document.querySelectorAll('.token-stack').forEach(t=>t.innerHTML='');
+  positions.forEach((pos,i)=>{
+    const stack = document.getElementById('tokens-'+pos);
+    if(stack){
+      const tok = document.createElement('span');
+      tok.className='token';
+      tok.style.background = players[i].color;
+      tok.textContent = players[i].initial;
+      tok.title = players[i].name;
+      stack.appendChild(tok);
+    }
+  });
+  document.querySelectorAll('.cell').forEach(c=>c.classList.remove('active-cell'));
+  const activeCell = document.getElementById('cell-'+positions[currentPlayer]);
+  if(activeCell && !gameOver) activeCell.classList.add('active-cell');
+
+  document.getElementById('boardProgress').textContent =
+    `Casilla ${positions[currentPlayer]} de ${TOTAL_CELLS-1}`;
+}
+
+/* ============================================================
+   RENDER: PANEL DE JUGADORES + BANNER DE TURNO
+   ============================================================ */
+function renderPlayersPanel(){
+  const el = document.getElementById('playersPanel');
+  el.innerHTML = '';
+  players.forEach((p,i)=>{
+    const row = document.createElement('div');
+    row.className = 'player-row' + (i===currentPlayer && !gameOver ? ' current' : '');
+    row.innerHTML = `
+      <span class="avatar-chip" style="background:${p.color}">${p.initial}</span>
+      <div class="player-info">
+        <div class="pname">${p.name}</div>
+        <div class="ppos">Casilla ${positions[i]}</div>
+      </div>
+      ${i===currentPlayer && !gameOver ? '<span class="turn-tag">Turno</span>' : ''}
+    `;
+    el.appendChild(row);
+  });
+}
+
+function renderTurnBanner(){
+  const el = document.getElementById('turnBannerName');
+  if(gameOver){
+    el.textContent = 'Partida finalizada';
+    return;
+  }
+  const p = players[currentPlayer];
+  el.innerHTML = `<span class="avatar-chip" style="background:${p.color};width:26px;height:26px;font-size:11px;">${p.initial}</span> ${p.name}`;
+}
+
+/* ============================================================
+   RENDER: HISTORIAL
+   ============================================================ */
+function pushHistory(text, type){
+  history.push({text, type});
+  renderHistory();
+}
+function renderHistory(){
+  const el = document.getElementById('historyList');
+  if(history.length===0){
+    el.innerHTML = '<div class="history-empty">Aún no hay movimientos.</div>';
+    return;
+  }
+  el.innerHTML = '';
+  history.slice(-12).forEach(h=>{
+    const div = document.createElement('div');
+    div.className = 'history-item' + (h.type ? ' '+h.type : '');
+    div.textContent = h.text;
+    el.appendChild(div);
+  });
+}
+
+/* ============================================================
+   DADO Y TURNOS
+   ============================================================ */
+function updateRollButton(){
+  const btn = document.getElementById('rollBtn');
+  btn.disabled = gameOver || pendingAnswer || hasRolledThisTurn;
+  btn.textContent = hasRolledThisTurn ? 'Responde el reto para continuar' : 'Lanzar dado';
+}
+
+document.getElementById('rollBtn').addEventListener('click', rollDice);
+
+function rollDice(){
+  if(gameOver || pendingAnswer || hasRolledThisTurn) return;
+  hasRolledThisTurn = true;
+  updateRollButton();
+
+  const dice = document.getElementById('dice');
+  dice.classList.add('rolling');
+  let rolls = 0;
+  const interval = setInterval(()=>{
+    dice.textContent = Math.ceil(Math.random()*6);
+    rolls++;
+    if(rolls>10){
+      clearInterval(interval);
+      dice.classList.remove('rolling');
+      const result = Math.ceil(Math.random()*6);
+      dice.textContent = result;
+      handleRollResult(result);
+    }
+  },55);
+}
+
+function handleRollResult(steps){
+  const from = positions[currentPlayer];
+  let target = Math.min(from + steps, TOTAL_CELLS-1);
+  pushHistory(`${players[currentPlayer].name} lanzó un ${steps}.`, null);
+
+  const type = cellType(target);
+
+  if(type==='start' || type==='finish'){
+    // sin pregunta: solo se mueve (salida) o ya llegó (meta directa)
+    positions[currentPlayer] = target;
+    placeTokens();
+    renderPlayersPanel();
+    if(target === TOTAL_CELLS-1){
+      pushHistory(`${players[currentPlayer].name} llegó a la Meta.`, 'ok');
+      endGame();
+      return;
+    }
+    finishTurn();
+    return;
+  }
+
+  showQuestion(type, target);
+}
+
+function showQuestion(unit, targetCell){
+  pendingAnswer = true;
+  const meta = UNIT_META[unit];
+  const q = pickQuestion(unit);
+
+  // Barajar las opciones manteniendo el rastro de cuál es la correcta
+  const items = q.opts.map((text, i)=>({text, isCorrect: i===q.correct}));
+  shuffle(items);
+  const correctIndex = items.findIndex(x=>x.isCorrect);
+
+  const zone = document.getElementById('cardZone');
+  zone.innerHTML = `
+    <div class="card-q-wrap">
+      <div class="card-unit-label" style="background:${meta.color}">${meta.name}</div>
+      <div class="card-q">${q.q}</div>
+      <div class="options" id="opts"></div>
+      <div id="fb"></div>
+    </div>
+  `;
+  const optsEl = document.getElementById('opts');
+  items.forEach((item, idx)=>{
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.textContent = item.text;
+    b.onclick = ()=>resolveAnswer(idx, correctIndex, optsEl, targetCell, q.expl);
+    optsEl.appendChild(b);
+  });
+}
+
+function resolveAnswer(chosenIdx, correctIdx, optsEl, targetCell, expl){
+  const buttons = optsEl.querySelectorAll('.opt');
+  buttons.forEach(b=>b.disabled=true);
+  const fb = document.getElementById('fb');
+  const pname = players[currentPlayer].name;
+  const explHtml = expl ? `<div class="feedback-expl"><strong>¿Por qué?</strong> ${expl}</div>` : '';
+
+  if(chosenIdx===correctIdx){
+    buttons[chosenIdx].classList.add('correct');
+    correctCount++;
+    positions[currentPlayer] = targetCell;
+    fb.innerHTML = `<div class="feedback ok">Respuesta correcta — avanzas a la casilla ${targetCell}.</div>
+      ${explHtml}
+      <button class="next-btn" id="contBtn">Continuar</button>`;
+    pushHistory(`${pname} respondió correctamente y avanzó a la casilla ${targetCell}.`, 'ok');
+  } else {
+    buttons[chosenIdx].classList.add('wrong');
+    buttons[correctIdx].classList.add('correct');
+    fb.innerHTML = `<div class="feedback bad">Respuesta incorrecta — te quedas en la casilla ${positions[currentPlayer]}.</div>
+      ${explHtml}
+      <button class="next-btn" id="contBtn">Continuar</button>`;
+    pushHistory(`${pname} respondió incorrectamente y permaneció en su lugar.`, 'bad');
+  }
+
+  document.getElementById('contBtn').onclick = ()=>{
+    placeTokens();
+    renderPlayersPanel();
+    if(positions[currentPlayer] >= TOTAL_CELLS-1){
+      endGame();
+      return;
+    }
+    finishTurn();
+  };
+}
+
+function finishTurn(){
+  pendingAnswer = false;
+  hasRolledThisTurn = false;
+  turnCount++;
+  currentPlayer = (currentPlayer+1) % players.length;
+  renderPlayersPanel();
+  renderTurnBanner();
+  updateRollButton();
+  document.getElementById('cardZone').innerHTML =
+    `<div class="card-idle">Es el turno de <strong>${players[currentPlayer].name}</strong>. Lanza el dado para continuar.</div>`;
+}
+
+/* ============================================================
+   FIN DE PARTIDA
+   ============================================================ */
+function endGame(){
+  gameOver = true;
+  placeTokens();
+  renderPlayersPanel();
+  renderTurnBanner();
+  updateRollButton();
+
+  document.getElementById('winTitle').textContent =
+    `¡Felicidades, ${players[currentPlayer].name}! Has completado la Ruta SanaMente.`;
+  document.getElementById('winTurns').textContent = turnCount+1;
+  document.getElementById('winCorrect').textContent = correctCount;
+
+  const modal = document.getElementById('winModal');
+  modal.classList.add('active');
+  spawnConfetti();
+}
+
+function spawnConfetti(){
+  const card = document.getElementById('winCard');
+  document.querySelectorAll('.confetti').forEach(c=>c.remove());
+  const colors = ['#3E8E73','#D79A3C','#A23B52','#6C5499','#2C7C92','#F2C166'];
+  for(let i=0;i<18;i++){
+    const span = document.createElement('span');
+    span.className='confetti';
+    span.style.left = (Math.random()*100)+'%';
+    span.style.background = colors[Math.floor(Math.random()*colors.length)];
+    span.style.animationDelay = (Math.random()*1.4)+'s';
+    span.style.transform = 'rotate('+(Math.random()*360)+'deg)';
+    card.appendChild(span);
+  }
+}
+
+document.getElementById('playAgainBtn').addEventListener('click', ()=>{
+  document.getElementById('winModal').classList.remove('active');
+  restartWithSamePlayers();
+});
+document.getElementById('backToMenuBtn').addEventListener('click', ()=>{
+  document.getElementById('winModal').classList.remove('active');
+  goToMenu();
+});
+
+function restartWithSamePlayers(){
+  positions = players.map(()=>0);
+  currentPlayer = 0;
+  gameOver = false;
+  pendingAnswer = false;
+  hasRolledThisTurn = false;
+  turnCount = 0;
+  correctCount = 0;
+  history = [];
+  resetUsedQuestions();
+  renderBoard();
+  renderPlayersPanel();
+  renderTurnBanner();
+  renderHistory();
+  updateRollButton();
+  document.getElementById('cardZone').innerHTML =
+    '<div class="card-idle">Lanza el dado para descubrir tu reto.</div>';
+}
+
+function goToMenu(){
+  document.getElementById('gameScreen').classList.remove('active');
+  document.getElementById('setupScreen').classList.remove('hidden');
+}
+
+/* ============================================================
+   REINICIAR PARTIDA (con confirmación)
+   ============================================================ */
+const confirmBox = document.getElementById('confirmBox');
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  confirmBox.classList.add('active');
+});
+document.getElementById('confirmNo').addEventListener('click', ()=>{
+  confirmBox.classList.remove('active');
+});
+document.getElementById('confirmYes').addEventListener('click', ()=>{
+  confirmBox.classList.remove('active');
+  restartWithSamePlayers();
+});
+</script>
+</body>
+</html>
